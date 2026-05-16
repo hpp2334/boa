@@ -462,3 +462,23 @@ fn break_labelled_try_statement() {
         js_str!("foo"),
     )]);
 }
+
+#[test]
+fn try_catch_finally_with_conditional_return() {
+    run_test_actions([TestAction::assert_eq(
+        indoc! {r#"
+            'use strict';
+            function g(a) {
+                var s = "b";
+                if (true)
+                    try {
+                        var y = a;
+                        if (y === s) return -1;
+                    } catch (e) {} finally {}
+                return 42;
+            }
+            g("a");
+        "#},
+        42,
+    )]);
+}

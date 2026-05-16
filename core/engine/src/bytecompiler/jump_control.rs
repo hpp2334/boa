@@ -615,10 +615,7 @@ impl ByteCompiler<'_> {
             thin_vec![Self::DUMMY_ADDRESS; info.jumps.len()],
         );
 
-        // We are assuming any indices outside our jump table will fallback
-        // to executing the next available op. Since we kinda control the jump
-        // table index here, this doesn't matter too much, but we _could_ also
-        // throw a PanicError on the next instruction.
+        let skip_handlers = self.jump();
 
         let mut patch_jumps = Vec::with_capacity(info.jumps.len());
         // Handle breaks/continue/returns in a finally block
@@ -628,6 +625,8 @@ impl ByteCompiler<'_> {
             let jump_record = info.jumps[i].clone();
             jump_record.perform_actions(Self::DUMMY_ADDRESS, self);
         }
+
+        self.patch_jump(skip_handlers);
 
         self.bytecode
             .patch_jump_table(jump_table_index, &patch_jumps);
